@@ -1,37 +1,37 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
+import BlogList from "./BlogList";
 
 const Home = () => {
-  const [blogs, setBlogs] = useState([
-    {
-      title: "My new website",
-      body: "lorem ipsum...",
-      author: "mario",
-      id: 1,
-    },
-    {
-      title: "Welcome party!",
-      body: "lorem ipsum...",
-      author: "yoshi",
-      id: 2,
-    },
-    {
-      title: "Web dev top tips",
-      body: "lorem ipsum...",
-      author: "mario",
-      id: 3,
-    },
-  ]);
+  const [blogs, setBlogs] = useState(null);
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
+  useEffect(()=>{
+    setTimeout(()=>{
+      fetch("http://localhost:8000/blogs")
+        .then((res) => {
+          if(!res.ok){
+            throw Error("Could not fetch the data for the resource")
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setBlogs(data);
+          setIsLoading(false);
+          setError(null)
+        })
+        .catch(err=>{
+          setIsLoading(false);
+          setError(err.message)
+        })
+    }, 1000)
+  
+}, [])
   return (
     <div className="home">
-      {blogs.map((blog) => {
-        return (
-          <div className="blog-preview" key={blog.id}>
-            <h2>{blog.title}</h2>
-            <p>Written by {blog.author}</p>
-          </div>
-        );
-      })}
+        {error && <div> {error}</div>}
+        {isLoading && <div>Page loading...</div>}
+        {blogs && <BlogList blogs={blogs} title="All Blogs" />}
     </div>
   );
 };
@@ -41,6 +41,13 @@ export default Home;
 // const Home = () => {
 //   const [name, setName] = useState("Fatty");
 //   const [age, setAge] = useState(20);
+
+// handleDelete
+// const handleDelete =(id)=>{
+//   const newBlog = blogs.filter(blog => blog.id !== id)
+//   setBlogs(newBlog)
+// }
+//<button onClick={() => handleDelete(blog.id)}>Delete Blog</button>;
 
 //   const handleClick = () => {
 //     setName("Yetty");
@@ -53,6 +60,13 @@ export default Home;
 //         {name} is {age} years old
 //       </p>
 //       <button onClick={handleClick}>Click Me</button>
+//reusing the component 
+  // <BlogList blogs={blogs} title="All Blogs" />
+  // <BlogList
+  //   blogs={blogs.filter((blog) => blog.author === "mario")}
+  //   title="Mario's Blogs"
+  // />
+
 //     </div>
 //   );
 // };
